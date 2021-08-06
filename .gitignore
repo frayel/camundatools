@@ -1,0 +1,13 @@
+*bak
+venv
+*pyc
+*~
+__pycache__/
+.idea/
+db.sqlite3
+.vscode/
+.coverage
+/static/*
+*.lock
+*.sqlite3-journal
+/src/

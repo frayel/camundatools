@@ -2,7 +2,7 @@
 # Teste Django + Kafka
 
 # Kafka
-Primeiro é necessario subir os dockers  
+Primeiro é necessario subir o docker contendo o kafka e o zookeper  
 
 ```sh
 $> docker-compose up -d

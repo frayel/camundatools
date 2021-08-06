@@ -14,12 +14,12 @@ $> docker exec broker kafka-topics --bootstrap-server broker:9092 --create --top
 
 # Executar o teste
 
-Executar o consumer:
-```sh
-$> python manage.py receive
-```
-
-Executar o producer:
+Executar o producer para colocar uma mensagem na fila:
 ```sh
 $> python manage.py send Mensagem
+```
+
+Executar o consumer, para processar as mensagens pendentes na fila:
+```sh
+$> python manage.py receive
 ```

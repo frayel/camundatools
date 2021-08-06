@@ -13,6 +13,8 @@ class Command(BaseCommand):
         mensagem = options.get('mensagem', 'Hello World')
         producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
         producer.send('topico_teste', {'mensagem': mensagem})
+        producer.flush()
+        producer.close()
         #self.stdout.write(self.style.HTTP_INFO(f'Comando enviado...'))
         self.stdout.write(self.style.SUCCESS('Comando Enviado.'))
 

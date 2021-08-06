@@ -1,17 +1,15 @@
 
-# Teste Django + Celery + RabbitMQ
+# Teste Django + Kafka
 
-# RabbitMQ
-Primeiro é necessario um broker de messageria. Rodar o RabbitMQ:  
+# Kafka
+Primeiro é necessario subir os dockers  
 
 ```sh
-$> docker run --net rede_teste --ip 172.18.0.2 -d --hostname rabbitmq --name rabbitmq -p 5672:5672 rabbitmq
+$> docker-compose up -d
 ```
-# Celery Worker
-Para consumir a fila é necessário um worker.  
-OBS: Para rodar em windows é necessário o parâmetro "-P gevent"
+# Criar um Topico
 ```sh
-$> celery -A app worker -l info -P gevent
+$> docker exec broker kafka-topics --bootstrap-server broker:9092 --create --topic topico_teste
 ```
 
 # Celery Beat

@@ -3,7 +3,7 @@ import os.path
 import sys
 import traceback
 
-from camundacmd.api.deployment import Deployment
+from camundatools.api.deployment import Deployment
 
 
 class DeployCommand:

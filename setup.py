@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='camundacmd',
+    name='camundatools',
     version='0.0.1',
     author='Felipe Rayel',
     description='A simple camunda framework.',
@@ -18,7 +18,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     entry_points={
             'console_scripts': [
-                'deploy = camundacmd.deploy:main'
+                'deploy = camundatools.deploy:main'
             ]
     },
     zip_safe=False,

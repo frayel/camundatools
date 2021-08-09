@@ -1,7 +1,7 @@
 import pathlib
 from xml.dom import minidom
 
-from camundacmd.api.base_rest import BaseRest
+from camundatools.api.base_rest import BaseRest
 
 
 class Deployment(BaseRest):

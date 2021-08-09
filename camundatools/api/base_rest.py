@@ -39,7 +39,7 @@ class BaseRest:
 
     def __init__(self):
         self.config = configparser.ConfigParser()
-        self.config.read("camundacmd.cfg")
+        self.config.read("camundatools.cfg")
 
 
     def call(self, method, url, headers, data=None, files=None, silent=False, binary=False, extend_timeout=False):

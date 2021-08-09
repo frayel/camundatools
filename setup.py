@@ -14,7 +14,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     license='MIT',
-    url='https://github.com/frayel/camundacmd',
+    url='https://github.com/frayel/camundatools',
     packages=setuptools.find_packages(),
     entry_points={
             'console_scripts': [

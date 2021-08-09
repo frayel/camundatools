@@ -11,6 +11,6 @@ db.sqlite3
 *.lock
 *.sqlite3-journal
 /src/
-/camundacmd.egg-info/
+/camundatools.egg-info/
 /build/
 /dist/

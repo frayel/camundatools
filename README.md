@@ -1,13 +1,13 @@
 
-# CamundaCmd
+# CamundaTools
 
-CamundaCmd is a Python REST api client for the workflow and decision automation engine Camunda.
+CamundaTools is a Python REST api client for the workflow and decision automation engine Camunda.
 
-CamundaCmd takes care of Camunda-specific characteristics and gives you an intuitive Python 
+CamundaTools takes care of Camunda-specific characteristics and gives you an intuitive Python 
 interface so you can focus on developing your actual business application. 
-So CamundaCmd deals with http requests, nested dictionaries, camelCase keys, 
+So CamundaTools deals with http requests, nested dictionaries, camelCase keys, 
 datetime formatting and more for you.
-CamundaCmd also bring command-line utils to manage deployment, instances and tasks.
+CamundaTools also bring command-line utils to manage deployment, instances and tasks.
 
 # Deploy a bpm
     deployment = Deployment('http://localhost:8080/engine-rest', 'demo', 'demo')

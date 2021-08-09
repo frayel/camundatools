@@ -1,3 +1,4 @@
+import configparser
 import datetime
 import json
 import logging
@@ -6,8 +7,6 @@ from base64 import b64encode
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-
-from camundacmd import settings
 
 logger = logging.getLogger(__name__)
 
@@ -38,27 +37,31 @@ def datetime_decoder(d):
 
 class BaseRest:
 
-    @staticmethod
-    def call(method, url, headers, data=None, files=None, silent=False, binary=False, extend_timeout=False):
+    def __init__(self):
+        self.config = configparser.ConfigParser()
+        self.config.read("camundacmd.cfg")
+
+
+    def call(self, method, url, headers, data=None, files=None, silent=False, binary=False, extend_timeout=False):
         session = requests.Session()
-        retries = Retry(total=settings.REQUEST_RETRY, backoff_factor=1, status_forcelist=[502, 503, 504], allowed_methods=['POST', 'GET', 'PUT', 'PATCH', 'DELETE'])
+        retries = Retry(total=int(self.config.get('config', 'REQUEST_RETRY')), backoff_factor=1, status_forcelist=[502, 503, 504], allowed_methods=['POST', 'GET', 'PUT', 'PATCH', 'DELETE'])
         session.mount('http://', HTTPAdapter(max_retries=retries))
         session.mount('https://', HTTPAdapter(max_retries=retries))
-        timeout = settings.REQUEST_TIMEOUT if not extend_timeout else 30
+        timeout = int(self.config.get('config', 'REQUEST_TIMEOUT')) if not extend_timeout else 30
 
         try:
             if method == 'post' and files is None:
-                resposta = session.post(url, data=json.dumps(data), headers=headers, verify=settings.ARQUIVO_CERTIFICADO, timeout=timeout)
+                resposta = session.post(url, data=json.dumps(data), headers=headers, verify=self.config.get('config', 'ARQUIVO_CERTIFICADO'), timeout=timeout)
             elif method == 'post' and files is not None:
-                resposta = session.post(url, data=data, files=files, headers=headers, verify=settings.ARQUIVO_CERTIFICADO, timeout=timeout)
+                resposta = session.post(url, data=data, files=files, headers=headers, verify=self.config.get('config', 'ARQUIVO_CERTIFICADO'), timeout=timeout)
             elif method == 'put':
-                resposta = session.put(url, data=json.dumps(data), headers=headers, verify=settings.ARQUIVO_CERTIFICADO, timeout=timeout)
+                resposta = session.put(url, data=json.dumps(data), headers=headers, verify=self.config.get('config', 'ARQUIVO_CERTIFICADO'), timeout=timeout)
             elif method == 'patch':
-                resposta = session.patch(url, data=json.dumps(data), headers=headers, verify=settings.ARQUIVO_CERTIFICADO, timeout=timeout)
+                resposta = session.patch(url, data=json.dumps(data), headers=headers, verify=self.config.get('config', 'ARQUIVO_CERTIFICADO'), timeout=timeout)
             elif method == 'delete':
-                resposta = session.delete(url, data=json.dumps(data), headers=headers, verify=settings.ARQUIVO_CERTIFICADO, timeout=timeout)
+                resposta = session.delete(url, data=json.dumps(data), headers=headers, verify=self.config.get('config', 'ARQUIVO_CERTIFICADO'), timeout=timeout)
             elif method == 'get':
-                resposta = session.get(url, headers=headers, verify=settings.ARQUIVO_CERTIFICADO, timeout=timeout)
+                resposta = session.get(url, headers=headers, verify=self.config.get('config', 'ARQUIVO_CERTIFICADO'), timeout=timeout)
             else:
                 raise Exception('Método não implementado')
         except ConnectionError:

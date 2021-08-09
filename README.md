@@ -12,3 +12,9 @@ CamundaCmd also bring command-line utils to manage deployment, instances and tas
 # Deploy a bpm
     deployment = Deployment('http://localhost:8080/engine-rest', 'demo', 'demo')
     deploy = deployment.deploy_bpmn('file.bpmn')
+
+# Tools:
+```bash
+$> deploy list
+$> deploy create file
+```

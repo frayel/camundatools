@@ -2,6 +2,7 @@ import configparser
 import datetime
 import json
 import logging
+import os
 from base64 import b64encode
 
 import requests
@@ -37,12 +38,14 @@ def datetime_decoder(d):
 
 class BaseRest:
 
-    def __init__(self):
+    def __init__(self, silent=False, config_file="camundatools.cfg"):
+        if not os.path.isfile(config_file):
+            raise Exception(f'File {config_file} does not exist!')
         self.config = configparser.ConfigParser()
-        self.config.read("camundatools.cfg")
+        self.config.read(config_file)
+        self.silent = silent
 
-
-    def call(self, method, url, headers, data=None, files=None, silent=False, binary=False, extend_timeout=False):
+    def call(self, method, url, headers, data=None, files=None, binary=False, extend_timeout=False):
         session = requests.Session()
         retries = Retry(total=int(self.config.get('config', 'REQUEST_RETRY')), backoff_factor=1, status_forcelist=[502, 503, 504], allowed_methods=['POST', 'GET', 'PUT', 'PATCH', 'DELETE'])
         session.mount('http://', HTTPAdapter(max_retries=retries))
@@ -71,7 +74,7 @@ class BaseRest:
             logger.critical('Erro ao executar a chamada remota', exc_info=True)
             raise Exception('Erro ao executar a chamada remota')
 
-        if not silent and resposta.status_code not in [200, 201, 204, 404]:
+        if not self.silent and resposta.status_code not in [200, 201, 204, 404]:
             logger.error(f'Resposta Inválida do Servidor!')
             logger.error(f'Request: Url={url} Headers={headers} Data={data}')
             logger.error(f'Response: Status Code={resposta.status_code} Mensagem={resposta.content}')
@@ -98,18 +101,10 @@ class BaseRest:
 
         return resposta.content
 
-    def get_header(self, username, password):
+    def get_header(self, username, password, content_json=True):
         user_pass = b64encode(f"{username}:{password}".encode()).decode("ascii")
-        headers = {
-            'content-type': 'application/json',
-            'Authorization': f'Basic {user_pass}',
-            #'Authorization': 'Bearer ' + self.token
-        }
-        return headers
+        headers = {'Authorization': f'Basic {user_pass}'}
+        if content_json:
+            headers['content-type'] = 'application/json'
 
-    def get_header_plain(self, username, password):
-        user_pass = b64encode(f"{username}:{password}".encode()).decode("ascii")
-        headers = {
-            'Authorization': f'Basic {user_pass}',
-        }
         return headers

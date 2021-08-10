@@ -10,15 +10,18 @@ setuptools.setup(
     name='camundatools',
     version='0.0.1',
     author='Felipe Rayel',
-    description='A simple camunda framework.',
+    author_email='felipe.rayel@gmail.com',
+    description='A simple camunda command line tool and framework',
     long_description=long_description,
     long_description_content_type="text/markdown",
     license='MIT',
     url='https://github.com/frayel/camundatools',
-    packages=setuptools.find_packages(),
+    packages=['camundatools'],
     entry_points={
             'console_scripts': [
-                'deploy = camundatools.deploy:main'
+                'definition = definition:main',
+                'instance = instance:main',
+                'task = task:main',
             ]
     },
     zip_safe=False,

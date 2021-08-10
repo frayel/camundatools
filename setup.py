@@ -16,7 +16,8 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     license='MIT',
     url='https://github.com/frayel/camundatools',
-    packages=['camundatools'],
+    packages=setuptools.find_packages(),
+    py_modules=['definition', 'instance', 'task'],
     entry_points={
             'console_scripts': [
                 'definition = definition:main',

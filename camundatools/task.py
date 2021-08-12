@@ -25,7 +25,7 @@ class Task(BaseRest):
         self.API_TASK_FORM_URL = '/task/{id}/form-variables'
         self._API_LIST_IDENTITY_URL = '/task/{id}/identity-links'
 
-    def list(self, process_key=None, business_key=None, candidate_groups=None, task_name=None,
+    def list(self, process_instance_id=None, process_key=None, business_key=None, candidate_groups=None, task_name=None,
              query_vars=None, or_queries=None, page=None):
         url = self.base_url + self._API_TASK_URL
 
@@ -39,6 +39,8 @@ class Task(BaseRest):
             'sortBy': 'created',
             'sortOrder': 'asc',
         }
+        if process_instance_id:
+            data['processInstanceId'] = process_instance_id
         if business_key:
             data['processInstanceBusinessKey'] = business_key
         if candidate_groups:

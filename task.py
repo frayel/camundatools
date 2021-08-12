@@ -37,7 +37,8 @@ class TaskCommand:
             print(f"{'TaskId':<40} {'TaskDefinitionKey':<30} {'TaskName':<40}")
             print(f"{'-'*40:<40} {'-'*30:<30} {'-'*40:<40}")
             tasks = self.task.list(process_key=key_definition, business_key=business_key,
-                                   candidate_groups=candidate_group, task_name=task_name, query_vars=query_vars, page=page)
+                                   candidate_groups=candidate_group, task_name=task_name, query_vars=query_vars,
+                                   page=page)
             for t in tasks:
                 t['name'] = t['name'].replace('\n', ' ')
                 print(f"{t['id']:<40} {t['taskDefinitionKey']:<30} {t['name']:<40}")

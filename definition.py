@@ -140,7 +140,7 @@ def main():
     parser.add_argument('--cfg', help='config file', nargs='?', default='camundatools.cfg', dest='config_file')
 
     # List
-    list_parser = subparsers.add_parser('list', help='List contents')
+    list_parser = subparsers.add_parser('list', help='List deployed process definitions')
     list_parser.add_argument('-k', help='process key definition',  nargs='?', dest='key_definition')
     list_parser.add_argument('-o', help='show only latest versions', action='store_true', dest='only_latest_version')
 

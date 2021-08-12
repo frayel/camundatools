@@ -31,7 +31,7 @@ MAX_RESULTS_NON_PAGINATED = 100
 ## Command Line Tools
 
 ### Definition Command
-    list                List contents
+    list                List deployed process definitions
     deploy              Deploy a definition
     delete              Delete a deployment
     clear               Clear all instances from a definition

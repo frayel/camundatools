@@ -1,9 +1,11 @@
 import argparse
 import json
 import sys
+import traceback
 
 from camundatools.definition import Definition
 from camundatools.instance import Instance
+from camundatools.task import Task
 
 
 class InstanceCommand:
@@ -11,11 +13,13 @@ class InstanceCommand:
     args: argparse.Namespace
     instance: Instance
     definition: Definition
+    task: Task
 
     def __init__(self, args: argparse.Namespace):
         self.args = args
         self.instance = Instance(silent=True, config_file=args.config_file)
         self.definition = Definition(silent=True, config_file=args.config_file)
+        self.task = Task(silent=True, config_file=args.config_file)
 
     def _do_start(self, process_key, business_key, variables):
         try:
@@ -48,7 +52,10 @@ class InstanceCommand:
     def _do_find(self, process_key, business_key):
         try:
             result = self.instance.find(process_key, business_key)
-            print(json.dumps(result, indent=4, sort_keys=True, default=str))
+            if result:
+                print(json.dumps(result, indent=4, sort_keys=True, default=str))
+            else:
+                print('Process definition not found!')
         except Exception as e:
             print(str(e))
             sys.exit(1)
@@ -79,11 +86,12 @@ class InstanceCommand:
         try:
             for instance in self.instance.list(key_definition, business_key):
                 instance = self.instance.inspect(instance['id'])
-                definition = self.instance.inspect(instance['definitionId'])
-                last_definition = self.instance.inspect(definition['key'])
+                definition = self.definition.inspect(instance['definitionId'])
+                last_definition = self.definition.inspect(key=definition['key'])
                 if last_definition['id'] != instance['definitionId']:
+                    print(f"Process {last_definition['id']} differs from {instance['definitionId']}")
                     instructions = list()
-                    for atividade in self.task.list(instance['id']):
+                    for atividade in self.task.list(process_instance_id=instance['id']):
                         instruction = dict()
                         instruction["sourceActivityIds"] = [source_activity] if source_activity else [atividade["taskDefinitionKey"]]
                         instruction["targetActivityIds"] = [target_activity] if target_activity else [atividade["taskDefinitionKey"]]
@@ -98,7 +106,7 @@ class InstanceCommand:
 
             print('Finished migrations.')
         except Exception as e:
-            print(str(e))
+            traceback.print_exc()
             sys.exit(1)
 
     def run(self, parser):

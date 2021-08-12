@@ -17,15 +17,27 @@ class TaskCommand:
         self.task = Task(silent=True, config_file=args.config_file)
         self.instance = Instance(silent=True, config_file=args.config_file)
 
-    def _do_list(self, key_definition, business_key, candidate_group, task_name, page):
+    def _do_list(self, key_definition, business_key, candidate_group, task_name, variable_value, page):
         try:
+            query_vars = None
+            if variable_value:
+                if '=' in variable_value:
+                    v = variable_value.split('=')
+                    if len(v) == 2:
+                        query_vars = [{
+                            'name': v[0],
+                            'value': v[1],
+                            'operator': 'eq',
+                        }]
+                    else:
+                        raise Exception('variable_value must be a "variable=value"')
+                else:
+                    raise Exception('variable_value must be a "variable=value"')
+
             print(f"{'TaskId':<40} {'TaskDefinitionKey':<30} {'TaskName':<40}")
             print(f"{'-'*40:<40} {'-'*30:<30} {'-'*40:<40}")
-            tasks = self.task.list(process_key=key_definition,
-                                       business_key=business_key,
-                                       candidate_groups=candidate_group,
-                                       task_name=task_name,
-                                       page=page)
+            tasks = self.task.list(process_key=key_definition, business_key=business_key,
+                                   candidate_groups=candidate_group, task_name=task_name, query_vars=query_vars, page=page)
             for t in tasks:
                 t['name'] = t['name'].replace('\n', ' ')
                 print(f"{t['id']:<40} {t['taskDefinitionKey']:<30} {t['name']:<40}")
@@ -86,8 +98,9 @@ class TaskCommand:
             business_key = self.args.business_key if 'business_key' in self.args else None
             candidate_group = self.args.candidate_group if 'candidate_group' in self.args else None
             task_name = self.args.task_name if 'task_name' in self.args else None
+            variable_value = self.args.variable_value if 'variable_value' in self.args else None
             page = self.args.page if 'page' in self.args else None
-            self._do_list(key_definition, business_key, candidate_group, task_name, page)
+            self._do_list(key_definition, business_key, candidate_group, task_name, variable_value, page)
         elif self.args.command == 'inspect':
             self._do_inspect(self.args.id)
         elif self.args.command == 'complete':
@@ -116,6 +129,7 @@ def main():
     list_parser.add_argument('-b', help='business key', nargs='?', dest='business_key')
     list_parser.add_argument('-c', help='candidate group', nargs='?', dest='candidate_group')
     list_parser.add_argument('-t', help='task name', nargs='?', dest='task_name')
+    list_parser.add_argument('-v', help='variable=value', nargs='?', dest='variable_value')
     list_parser.add_argument('-p', help='page', nargs='?', dest='page')
 
     # Inspect

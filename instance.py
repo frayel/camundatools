@@ -61,6 +61,20 @@ class InstanceCommand:
             print(str(e))
             sys.exit(1)
 
+    def _do_download(self, process_instance_id, file_name):
+        try:
+            result = self.instance.inspect(process_instance_id)
+            xml = self.instance.get_xml(result["definitionId"])
+            filename = f"{xml['id']}.bpmn".replace(":", "_") if not file_name else file_name
+            with open(filename, 'w') as file:
+                file.write(xml['bpmn20Xml'])
+            file.close()
+            print(f'{filename} saved.')
+
+        except Exception as e:
+            print(str(e))
+            sys.exit(1)
+
     def _do_migrate(self, key_definition, business_key, source_activity, target_activity):
         try:
             for instance in self.instance.list(key_definition, business_key):
@@ -101,6 +115,9 @@ class InstanceCommand:
             self._do_find(self.args.key_definition, self.args.business_key)
         elif self.args.command == 'delete':
             self._do_delete(self.args.id, self.args.reason)
+        elif self.args.command == 'download':
+            file_name = self.args.file_name if 'file_name' in self.args else False
+            self._do_download(self.args.id, file_name)
         elif self.args.command == 'migrate':
             key_definition = self.args.key_definition if 'key_definition' in self.args else None
             business_key = self.args.business_key if 'business_key' in self.args else None
@@ -149,6 +166,11 @@ def main():
     migrate_parser.add_argument('-b', help='business key', nargs='?', dest='business_key')
     migrate_parser.add_argument('-s', '--source', help='source activity', nargs='?', dest='source_activity')
     migrate_parser.add_argument('-t', '--target', help='target activity', nargs='?', dest='target_activity')
+
+    # Download
+    download_parser = subparsers.add_parser('download', help='Download a XML of the process instance')
+    download_parser.add_argument('id', help='process instance id')
+    download_parser.add_argument('-f', help='output name', nargs='?', dest='file_name')
 
     deployment = InstanceCommand(parser.parse_args())
     deployment.run(parser)

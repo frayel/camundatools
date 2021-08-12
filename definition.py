@@ -97,6 +97,19 @@ class DefinitionCommand:
             sys.exit(1)
         print(f"Definition {key_definition} cleared!")
 
+    def _do_download(self, key_definition, file_name):
+        try:
+            xml = self.definition.get_xml(key_definition)
+            filename = f"{xml['id']}.bpmn".replace(":", "_") if not file_name else file_name
+            with open(filename, 'w') as file:
+                file.write(xml['bpmn20Xml'])
+            file.close()
+            print(f'{filename} saved.')
+
+        except Exception as e:
+            print(str(e))
+            sys.exit(1)
+
     def run(self, parser):
 
         if self.args.command == 'deploy':
@@ -111,13 +124,15 @@ class DefinitionCommand:
             self._do_list(self.args.key_definition, only_latest_version)
         elif self.args.command == 'clear':
             self._do_clear(self.args.key_definition)
+        elif self.args.command == 'download':
+            file_name = self.args.file_name if 'file_name' in self.args else False
+            self._do_download(self.args.key_definition, file_name)
         else:
             parser.print_help()
 
 
 def main():
     #TODO: deploy all files in dir
-    #TODO: Download a bpmn form server
 
     description = '''Deploy, undeploy or list definitions on a Camunda server'''
     parser = argparse.ArgumentParser(description=description, argument_default=argparse.SUPPRESS)
@@ -142,6 +157,11 @@ def main():
     # Clear
     clear_parser = subparsers.add_parser('clear', help='Clear all instances from a definition')
     clear_parser.add_argument('key_definition', help='process key definition')
+
+    # Download
+    download_parser = subparsers.add_parser('download', help='Download latest version of a XML definition from server')
+    download_parser.add_argument('key_definition', help='process key definition')
+    download_parser.add_argument('-f', help='output name', nargs='?', dest='file_name')
 
     deployment = DefinitionCommand(parser.parse_args())
     deployment.run(parser)

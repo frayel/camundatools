@@ -19,8 +19,11 @@ CAMUNDA_API_BASE_URL = http://localhost:8080/engine-rest
 CAMUNDA_AUTH_USERNAME = demo
 CAMUNDA_AUTH_PASSWORD = demo
 REQUEST_RETRY = 3
-REQUEST_TIMEOUT = 10
-ARQUIVO_CERTIFICADO =
+REQUEST_TIMEOUT = 5
+EXTERNAL_MAX_TASKS = 10
+EXTERNAL_TASK_LOCK_DURATION_IN_MILISECONDS = 30000
+EXTERNAL_TASK_RETRY_TIMEOUT = 300000
+CERT_FILE = cert_file.pem
 MAX_RESULTS_PER_PAGE = 100
 MAX_RESULTS_NON_PAGINATED = 100
 ```
@@ -30,12 +33,16 @@ MAX_RESULTS_NON_PAGINATED = 100
 ### Definition Command
     list                List contents
     deploy              Deploy a definition
-    delete              Delete a definition
+    delete              Delete a deployment
+    clear               Clear all instances from a definition
+    download            Download latest version of a XML definition from server
 
 ```bash
 $> definition list
-$> definition deploy filename.bpmn
-$> definition delete deployment_id
+$> definition deploy <filename.bpmn>
+$> definition delete <deployment_id>
+$> definition clear <definition_key>
+$> definition download <definition_key>
 ```
 ### Instance Command
     start               Start a process instance
@@ -44,13 +51,14 @@ $> definition delete deployment_id
     find                Find a process instance by business key
     delete              Delete a process instance
     migrate             Migrate a process instance to a newer definition
+    download            Download a XML of the process instance
 
 ```bash
-$> instance start
+$> instance start <process_key> <business_key>
 $> instance list
-$> instance inspect
-$> instance find
-$> instance delete
+$> instance inspect <process_instance_id>
+$> instance find <process_key> <business_key>
+$> instance delete <process_instance_id> <reason>
 $> instance migrate
 ```
 ### Task Command
@@ -62,10 +70,10 @@ $> instance migrate
 
 ```bash
 $> task list
-$> task inspect
-$> task complete
-$> task delete
-$> task move
+$> task inspect <task_id>
+$> task complete <task_id>
+$> task delete <task_id>
+$> task move <process_instance_id> <new_task_name>
 ```
 
 # API

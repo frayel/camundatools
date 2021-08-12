@@ -1,15 +1,12 @@
 import configparser
 import datetime
 import json
-import logging
 import os
 from base64 import b64encode
 
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-
-logger = logging.getLogger(__name__)
 
 
 def datetime_decoder(d):
@@ -45,53 +42,39 @@ class BaseRest:
         self.config.read(config_file)
         self.silent = silent
 
-    def call(self, method, url, headers, data=None, files=None, binary=False, extend_timeout=False):
+    def call(self, method, url, headers, data=None, files=None, binary=False):
         session = requests.Session()
-        retries = Retry(total=int(self.config.get('config', 'REQUEST_RETRY')), backoff_factor=1, status_forcelist=[502, 503, 504], allowed_methods=['POST', 'GET', 'PUT', 'PATCH', 'DELETE'])
+        retries = Retry(total=int(self.config.get('config', 'REQUEST_RETRY', fallback=3)), backoff_factor=1, status_forcelist=[502, 503, 504], allowed_methods=['POST', 'GET', 'PUT', 'PATCH', 'DELETE'])
         session.mount('http://', HTTPAdapter(max_retries=retries))
         session.mount('https://', HTTPAdapter(max_retries=retries))
-        timeout = int(self.config.get('config', 'REQUEST_TIMEOUT')) if not extend_timeout else 30
+        timeout = int(self.config.get('config', 'REQUEST_TIMEOUT', fallback=5))
+        cert_file = self.config.get('config', 'CERT_FILE', fallback=None)
 
-        try:
-            if method == 'post' and files is None:
-                resposta = session.post(url, data=json.dumps(data), headers=headers, verify=self.config.get('config', 'ARQUIVO_CERTIFICADO'), timeout=timeout)
-            elif method == 'post' and files is not None:
-                resposta = session.post(url, data=data, files=files, headers=headers, verify=self.config.get('config', 'ARQUIVO_CERTIFICADO'), timeout=timeout)
-            elif method == 'put':
-                resposta = session.put(url, data=json.dumps(data), headers=headers, verify=self.config.get('config', 'ARQUIVO_CERTIFICADO'), timeout=timeout)
-            elif method == 'patch':
-                resposta = session.patch(url, data=json.dumps(data), headers=headers, verify=self.config.get('config', 'ARQUIVO_CERTIFICADO'), timeout=timeout)
-            elif method == 'delete':
-                resposta = session.delete(url, data=json.dumps(data), headers=headers, verify=self.config.get('config', 'ARQUIVO_CERTIFICADO'), timeout=timeout)
-            elif method == 'get':
-                resposta = session.get(url, headers=headers, verify=self.config.get('config', 'ARQUIVO_CERTIFICADO'), timeout=timeout)
-            else:
-                raise Exception('Método não implementado')
-        except ConnectionError:
-            logger.critical('Erro de comunicação', exc_info=True)
-            raise Exception('Erro de comunicação')
-        except Exception:
-            logger.critical('Erro ao executar a chamada remota', exc_info=True)
-            raise Exception('Erro ao executar a chamada remota')
+        response = getattr(session, method)(url,
+                                            data=json.dumps(data) if files is None else data,
+                                            files=files,
+                                            headers=headers,
+                                            verify=cert_file,
+                                            timeout=timeout)
 
-        if not self.silent and resposta.status_code not in [200, 201, 204, 404]:
-            logger.error(f'Resposta Inválida do Servidor!')
-            logger.error(f'Request: Url={url} Headers={headers} Data={data}')
-            logger.error(f'Response: Status Code={resposta.status_code} Mensagem={resposta.content}')
+        if not self.silent and response.status_code not in [200, 201, 204, 404]:
+            print(f'Server returned an error status.')
+            print(f'Request: Url={url} Headers={headers} Data={data}')
+            print(f'Response: Status Code={response.status_code} Mensagem={response.content}')
 
-        if resposta.status_code >= 300:
-            mensagem = f'Erro {resposta.status_code}'
-            if resposta.content:
+        if response.status_code >= 300:
+            mensagem = f'Error Code {response.status_code}'
+            if response.content:
                 try:
-                    error = json.loads(resposta.content)
+                    error = json.loads(response.content)
                     mensagem = error['message']
                 except:
-                    mensagem = resposta.content
+                    mensagem = response.content
             raise Exception(mensagem)
-        resposta.raise_for_status()
+        response.raise_for_status()
 
-        if not binary and resposta.content != '':
-            text = resposta.content
+        if not binary and response.content != '':
+            text = response.content
             try:
                 text = json.loads(text, object_hook=datetime_decoder)
             except:
@@ -99,7 +82,7 @@ class BaseRest:
 
             return text
 
-        return resposta.content
+        return response.content
 
     def get_header(self, username, password, content_json=True):
         user_pass = b64encode(f"{username}:{password}".encode()).decode("ascii")

@@ -11,15 +11,24 @@ class Definition(BaseRest):
 
     def __init__(self, url=None, username=None, password=None, config_file="camundatools.cfg", silent=False):
         super().__init__(silent=silent, config_file=config_file)
-        self.base_url = url or self.config.get("config", "CAMUNDA_API_BASE_URL")
-        username = username or self.config.get("config", "CAMUNDA_AUTH_USERNAME")
-        password = password or self.config.get("config", "CAMUNDA_AUTH_PASSWORD")
+        self.base_url = url or self.config.get("config", "API_BASE_URL", fallback="http://localhost:8080/engine-rest")
+        username = username or self.config.get("config", "AUTH_USERNAME", fallback="demo")
+        password = password or self.config.get("config", "AUTH_PASSWORD", fallback="demo")
         self.headers_plain = self.get_header(username, password, content_json=False)
         self.headers_json = self.get_header(username, password, content_json=True)
 
         self._API_CREATE_DEPLOYMENT_URL = '/deployment/create'
         self._API_DEPLOYMENT_URL = '/deployment/{id}'
         self._API_DEFINITIONS_URL = '/process-definition'
+        self._API_VERSION_URL = '/version'
+        self._API_STARTING_FORM_URL = '/process-definition/key/{key}/form-variables'
+        self._API_STARTING_FORM_KEY_URL = '/process-definition/key/{key}/startForm'
+        self._API_LIST_IDENTITY_HISTORY_URL = '/history/identity-link-log'
+        self._API_GET_XML_URL = '/process-definition/key/{key}/xml'
+
+    def get_camunda_version(self):
+        url = self.base_url + self._API_VERSION_URL
+        return super().call('get', url, self.headers_json)
 
     def deploy(self, file_name, changed_only=True):
         url = self.base_url + self._API_CREATE_DEPLOYMENT_URL
@@ -71,3 +80,23 @@ class Definition(BaseRest):
             url += f'/key/{key}'
 
         return self.call('get', url, self.headers_json)
+
+    def get_starting_form(self, process_key):
+        url = self.base_url + self._API_STARTING_FORM_URL
+        url = url.replace('{key}', process_key)
+        return super().call('get', url, self.headers_json)
+
+    def get_starting_form_key(self, process_key):
+        url = self.base_url + self._API_STARTING_FORM_KEY_URL
+        url = url.replace('{key}', process_key)
+        return super().call('get', url, self.headers_json)
+
+    def list_identity_history(self, process_key, task_id):
+        url = self.base_url + self._API_LIST_IDENTITY_HISTORY_URL
+        param = '?taskId=' + task_id + '&processDefinitionKey=' + process_key
+        return super().call('get', url + param, self.headers_json)
+
+    def get_xml(self, process_key):
+        url = self.base_url + self._API_GET_XML_URL
+        url = url.replace('{key}', process_key)
+        return super().call('get', url, self.headers_json)

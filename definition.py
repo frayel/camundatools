@@ -132,7 +132,6 @@ class DefinitionCommand:
 
 
 def main():
-    #TODO: deploy all files in dir
 
     description = '''Deploy, undeploy or list definitions on a Camunda server'''
     parser = argparse.ArgumentParser(description=description, argument_default=argparse.SUPPRESS)

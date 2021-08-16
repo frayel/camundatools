@@ -54,9 +54,12 @@ class TaskCommand:
             print(str(e))
             sys.exit(1)
 
-    def _do_complete(self, process_key, business_key):
+    def _do_complete(self, task_id, variables, json_vars_file):
         try:
-            result = self.instance.find(process_key, business_key)
+            if json_vars_file:
+                with open(json_vars_file, "r") as file:
+                    variables = json.load(file)
+            result = self.task.complete(task_id, variables)
             print(result)
         except Exception as e:
             print(str(e))
@@ -106,7 +109,8 @@ class TaskCommand:
             self._do_inspect(self.args.id)
         elif self.args.command == 'complete':
             variables = self.args.variables if 'variables' in self.args else None
-            self._do_complete(self.args.id, variables)
+            json_vars_file = self.args.json_vars_file if 'json_vars_file' in self.args else None
+            self._do_complete(self.args.id, variables, json_vars_file)
         elif self.args.command == 'delete':
             self._do_delete(self.args.id)
         elif self.args.command == 'move':
@@ -116,8 +120,6 @@ class TaskCommand:
 
 
 def main():
-    #TODO: complete with a json vars file
-    #TODO: inspect by process and business key
 
     description = '''Manage tasks on a Camunda server'''
     parser = argparse.ArgumentParser(description=description, argument_default=argparse.SUPPRESS)
@@ -141,6 +143,7 @@ def main():
     complete_parser = subparsers.add_parser('complete', help='complete a task')
     complete_parser.add_argument('id', help='task id')
     complete_parser.add_argument('-v', help='process variables',  nargs='?', dest='variables')
+    complete_parser.add_argument('-j', help='json vars file name', nargs='?', dest='json_vars_file')
 
     # Delete
     delete_parser = subparsers.add_parser('delete', help='Delete a task')

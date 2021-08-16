@@ -21,8 +21,11 @@ class InstanceCommand:
         self.definition = Definition(silent=True, config_file=args.config_file)
         self.task = Task(silent=True, config_file=args.config_file)
 
-    def _do_start(self, process_key, business_key, variables):
+    def _do_start(self, process_key, business_key, variables, json_vars_file):
         try:
+            if json_vars_file:
+                with open(json_vars_file, "r") as file:
+                    variables = json.load(file)
             result = self.instance.start_process(process_key, business_key, variables)
             print(f'Process instance started with id {result["id"]} and definition {result["definitionId"]}')
         except Exception as e:
@@ -113,7 +116,8 @@ class InstanceCommand:
 
         if self.args.command == 'start':
             variables = self.args.variables if 'variables' in self.args else None
-            self._do_start(self.args.key_definition, self.args.business_key, variables)
+            json_vars_file = self.args.json_vars_file if 'json_vars_file' in self.args else None
+            self._do_start(self.args.key_definition, self.args.business_key, variables, json_vars_file)
         elif self.args.command == 'list':
             key_definition = self.args.key_definition if 'key_definition' in self.args else None
             self._do_list(key_definition)
@@ -137,7 +141,6 @@ class InstanceCommand:
 
 
 def main():
-    #TODO: start with a json var file
 
     description = '''Manage process instances on a Camunda server'''
     parser = argparse.ArgumentParser(description=description, argument_default=argparse.SUPPRESS)
@@ -149,6 +152,7 @@ def main():
     start_parser.add_argument('key_definition', help='process key definition')
     start_parser.add_argument('business_key', help='business key')
     start_parser.add_argument('-v', help='process variables',  nargs='?', dest='variables')
+    start_parser.add_argument('-j', help='json vars file name', nargs='?', dest='json_vars_file')
 
     # List
     list_parser = subparsers.add_parser('list', help='List process instances')

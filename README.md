@@ -9,7 +9,7 @@ CamundaTools also has a set of command line tools to manage definitions, instanc
 Felipe Rayel <felipe.rayel@gmail.com>
 
 ## Install
-?
+pip install camundatools
 
 ## Setup
 Create a file in the root path  called camundatools.cfg
@@ -30,13 +30,14 @@ MAX_RESULTS_NON_PAGINATED = 100
 
 ## Command Line Tools
 
-### Definition Command
+### Definition Command Parameters
     list                List deployed process definitions
     deploy              Deploy a definition
     delete              Delete a deployment
     clear               Clear all instances from a definition
     download            Download latest version of a XML definition from server
 
+### Example:
 ```bash
 $> definition list
 $> definition deploy <filename.bpmn>
@@ -44,7 +45,7 @@ $> definition delete <deployment_id>
 $> definition clear <definition_key>
 $> definition download <definition_key>
 ```
-### Instance Command
+### Instance Command Parameters
     start               Start a process instance
     list                List process instances
     inspect             Inspect a process instance
@@ -53,6 +54,7 @@ $> definition download <definition_key>
     migrate             Migrate a process instance to a newer definition
     download            Download a XML of the process instance
 
+### Example:
 ```bash
 $> instance start <process_key> <business_key>
 $> instance list
@@ -61,13 +63,14 @@ $> instance find <process_key> <business_key>
 $> instance delete <process_instance_id> <reason>
 $> instance migrate
 ```
-### Task Command
+### Task Command Parameters
     list                List tasks
     inspect             Inspect a task
     complete            complete a task
     delete              Delete a task
     move                Move a task to other activity
 
+### Example:
 ```bash
 $> task list
 $> task inspect <task_id>
@@ -76,7 +79,7 @@ $> task delete <task_id>
 $> task move <process_instance_id> <new_task_name>
 ```
 
-# API
+# Using the API
 
 ### Deploy a bpm
     definition_api = Definition('http://localhost:8080/engine-rest', 'demo', 'demo')

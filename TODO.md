@@ -1,3 +1,6 @@
-# TODO: inspect by process and business key
-# TODO: deploy all files in dir
-# TODO: test cases
+* Inspect by process and business key
+* Deploy all files in dir
+* Test cases
+* External tasks
+* CMMN API
+* DMN API
